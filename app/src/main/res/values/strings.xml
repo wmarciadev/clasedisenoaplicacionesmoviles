@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DemoLayout</string>
+    <string name="ubicacion_de_texto_de_acuerdo_a_boton">ubicacion de texto de acuerdo a boton</string>
+    <string name="textboton">ubicacionBoton</string>
+</resources>
