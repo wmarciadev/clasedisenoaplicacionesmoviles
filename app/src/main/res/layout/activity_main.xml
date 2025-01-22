@@ -11,9 +11,9 @@
         android:id="@+id/txtview01"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="76dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="80dp"
         android:text="@string/ubicacion_de_texto_de_acuerdo_a_boton"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn01" />
 
@@ -21,21 +21,23 @@
         android:id="@+id/btn01"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="128dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="48dp"
         android:text="@string/textboton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="253dp"
-        android:layout_height="327dp"
-        android:layout_marginStart="76dp"
-        android:layout_marginTop="16dp"
-        android:contentDescription="@string/paisaje"
+        android:layout_width="239dp"
+        android:layout_height="321dp"
+        android:layout_marginBottom="132dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtview01"
+        app:layout_constraintVertical_bias="1.0"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
