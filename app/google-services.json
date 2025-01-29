@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "622771115867",
+    "project_id": "appregistrocliente",
+    "storage_bucket": "appregistrocliente.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:622771115867:android:9d3e16748c0e060cf52c7e",
+        "android_client_info": {
+          "package_name": "com.atclabs.firebaseauthconnectiondemo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFexLmcAu4FijfSBlC5xn1v7rjt1P3H44"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

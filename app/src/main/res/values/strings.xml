@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">DrawerActivitySample2</string>
+    <string name="email_address">Enter your email address</string>
+    <string name="password">Enter your password</string>
+    <string name="name">Enter your full name</string>
+    <string name="city">Enter your city</string>
+    <string name="country">Enter your country</string>
+    <string name="phone_number">Enter your phone number</string>
+</resources>
