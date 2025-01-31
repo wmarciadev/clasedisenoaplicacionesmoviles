@@ -15,6 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.security.MessageDigest
+import androidx.appcompat.widget.SearchView // Importa SearchView
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: CharacterAdapter
     private lateinit var nextButton: Button
     private lateinit var prevButton: Button
+    private lateinit var searchView: SearchView // Nueva variable para el SearchView
 
     private val publicKey = "e3cddce7ce5912f940d17aab3539060e"
     private val privateKey = "1c4ecaf317b3106ee1c4e481e0a8c53ac83763f5"
@@ -40,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         nextButton = findViewById(R.id.nextButton)
         prevButton = findViewById(R.id.prevButton)
+        searchView = findViewById(R.id.searchView) // Inicializa el SearchView
 
         recyclerView.layoutManager = GridLayoutManager(this, 2)
 
@@ -75,6 +78,18 @@ class MainActivity : AppCompatActivity() {
                 loadCharacters()
             }
         }
+
+        // Configura el listener para el SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { performSearch(it) }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
     }
 
     private fun loadCharacters() {
@@ -86,6 +101,29 @@ class MainActivity : AppCompatActivity() {
                         response.body()?.data?.results?.let {
                             adapter.submitList(it)
                             prevButton.isEnabled = currentPage > 0
+                            nextButton.isEnabled = it.size >= limit // Habilita "Siguiente" si hay resultados
+                        }
+                    } else {
+                        Toast.makeText(this@MainActivity, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<MarvelResponse>, t: Throwable) {
+                    Toast.makeText(this@MainActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun performSearch(query: String) {
+        val offset = 0 // Reinicia el offset para la búsqueda
+        apiService.searchCharacters(publicKey, hash, timestamp, query, limit, offset)
+            .enqueue(object : Callback<MarvelResponse> {
+                override fun onResponse(call: Call<MarvelResponse>, response: Response<MarvelResponse>) {
+                    if (response.isSuccessful) {
+                        response.body()?.data?.results?.let {
+                            adapter.submitList(it)
+                            prevButton.isEnabled = false // Deshabilita "Anterior" en la búsqueda inicial
+                            nextButton.isEnabled = it.size >= limit // Habilita "Siguiente" si hay resultados
                         }
                     } else {
                         Toast.makeText(this@MainActivity, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
