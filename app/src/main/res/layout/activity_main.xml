@@ -17,19 +17,42 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
-    <!-- Botones para navegar entre páginas -->
-    <Button
-        android:id="@+id/prevButton"
+    <!-- Barra de carga -->
+    <ProgressBar
+        android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Previous" />
+        android:layout_gravity="center"
+        android:visibility="gone"/>
 
-    <Button
-        android:id="@+id/nextButton"
-        android:layout_width="wrap_content"
+    <!-- Contenedor para los botones de navegación -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Next" />
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/prevButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Previous"
+            android:enabled="false"/>
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/nextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:enabled="false"/>
+    </LinearLayout>
 
 </LinearLayout>

@@ -2,7 +2,9 @@ package keiseruniversity.marvel
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -15,7 +17,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.security.MessageDigest
-import androidx.appcompat.widget.SearchView // Importa SearchView
+import androidx.appcompat.widget.SearchView
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,7 +26,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: CharacterAdapter
     private lateinit var nextButton: Button
     private lateinit var prevButton: Button
-    private lateinit var searchView: SearchView // Nueva variable para el SearchView
+    private lateinit var searchView: SearchView
+    private lateinit var progressBar: ProgressBar // Agregado ProgressBar
 
     private val publicKey = "e3cddce7ce5912f940d17aab3539060e"
     private val privateKey = "1c4ecaf317b3106ee1c4e481e0a8c53ac83763f5"
@@ -34,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private val limit = 6
 
     private lateinit var apiService: MarvelApiService
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +47,8 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         nextButton = findViewById(R.id.nextButton)
         prevButton = findViewById(R.id.prevButton)
-        searchView = findViewById(R.id.searchView) // Inicializa el SearchView
+        searchView = findViewById(R.id.searchView)
+        progressBar = findViewById(R.id.progressBar) // Inicializa el ProgressBar
 
         recyclerView.layoutManager = GridLayoutManager(this, 2)
 
@@ -79,7 +85,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Configura el listener para el SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let { performSearch(it) }
@@ -93,47 +98,67 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadCharacters() {
+        progressBar.visibility = View.VISIBLE
+        nextButton.isEnabled = false
+        prevButton.isEnabled = false
+
         val offset = currentPage * limit
-        apiService.getCharacters(publicKey, hash, timestamp, limit, offset)
-            .enqueue(object : Callback<MarvelResponse> {
-                override fun onResponse(call: Call<MarvelResponse>, response: Response<MarvelResponse>) {
-                    if (response.isSuccessful) {
-                        response.body()?.data?.results?.let {
-                            adapter.submitList(it)
-                            prevButton.isEnabled = currentPage > 0
-                            nextButton.isEnabled = it.size >= limit // Habilita "Siguiente" si hay resultados
-                        }
-                    } else {
-                        Toast.makeText(this@MainActivity, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
-                    }
+
+        coroutineScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.getCharacters(publicKey, hash, timestamp, limit, offset).execute()
                 }
 
-                override fun onFailure(call: Call<MarvelResponse>, t: Throwable) {
-                    Toast.makeText(this@MainActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                if (response.isSuccessful) {
+                    response.body()?.data?.results?.let {
+                        adapter.submitList(it)
+                        prevButton.isEnabled = currentPage > 0
+                        nextButton.isEnabled = it.size >= limit
+                    }
+                } else {
+                    showToast("Error: ${response.code()}")
                 }
-            })
+            } catch (e: Exception) {
+                showToast("Error: ${e.message}")
+            } finally {
+                progressBar.visibility = View.GONE
+            }
+        }
     }
 
     private fun performSearch(query: String) {
-        val offset = 0 // Reinicia el offset para la búsqueda
-        apiService.searchCharacters(publicKey, hash, timestamp, query, limit, offset)
-            .enqueue(object : Callback<MarvelResponse> {
-                override fun onResponse(call: Call<MarvelResponse>, response: Response<MarvelResponse>) {
-                    if (response.isSuccessful) {
-                        response.body()?.data?.results?.let {
-                            adapter.submitList(it)
-                            prevButton.isEnabled = false // Deshabilita "Anterior" en la búsqueda inicial
-                            nextButton.isEnabled = it.size >= limit // Habilita "Siguiente" si hay resultados
-                        }
-                    } else {
-                        Toast.makeText(this@MainActivity, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
-                    }
+        progressBar.visibility = View.VISIBLE
+        nextButton.isEnabled = false
+        prevButton.isEnabled = false
+
+        coroutineScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.searchCharacters(publicKey, hash, timestamp, query, limit, 0).execute()
                 }
 
-                override fun onFailure(call: Call<MarvelResponse>, t: Throwable) {
-                    Toast.makeText(this@MainActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                if (response.isSuccessful) {
+                    response.body()?.data?.results?.let {
+                        adapter.submitList(it)
+                        prevButton.isEnabled = false
+                        nextButton.isEnabled = it.size >= limit
+                    }
+                } else {
+                    showToast("Error: ${response.code()}")
                 }
-            })
+            } catch (e: Exception) {
+                showToast("Error: ${e.message}")
+            } finally {
+                progressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun showToast(message: String) {
+        runOnUiThread {
+            Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun generateHash(timestamp: String, privateKey: String, publicKey: String): String {
@@ -144,5 +169,10 @@ class MainActivity : AppCompatActivity() {
     private fun String.md5(): String {
         val digest = MessageDigest.getInstance("MD5")
         return digest.digest(this.toByteArray()).joinToString("") { "%02x".format(it) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        coroutineScope.cancel() // Cancela las coroutines para evitar fugas de memoria
     }
 }

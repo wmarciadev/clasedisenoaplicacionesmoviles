@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Marvel</string>
+    <string name="personaje_no_encontrado">Personaje no Encontrado</string>
+    <string name="errror_de_carga_del_detalle_del_personaje">Errror de carga del detalle del personaje</string>
 </resources>
