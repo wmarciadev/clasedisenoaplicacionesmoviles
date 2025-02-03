@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">sqlitedemo</string>
+    <string name="nombre">Nombre</string>
+    <string name="tel_fono">Teléfono</string>
+    <string name="agregar_contacto">Agregar Contacto</string>
+    <string name="mostrar_contactos">Mostrar Contactos</string>
+</resources>
